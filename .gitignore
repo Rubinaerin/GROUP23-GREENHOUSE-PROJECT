@@ -1,0 +1,3 @@
+.venv/
+greenhouse.db
+__pycache__/
