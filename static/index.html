@@ -28,7 +28,7 @@ label{display:flex;flex-direction:column;font-size:.85rem;color:var(--mut)}input
 <script>
 const T=[["temp","Temperature","°C","--hot"],["humidity","Humidity","%","--water"],["soil","Soil moisture","%","--leaf"],["light","Light","lux","--sun"]];
 const A=[["light","Light"],["fan","Fan"],["heater","Heater"]];
-const F=[["soil_min","Water below soil (%)"],["lux_min","Light on below (lux)"],["pump_seconds","Pump run (s)"],["temp_min","Min temp (°C)"],["temp_max","Max temp (°C)"],["hum_max","Max humidity (%)"]];
+const F=[["soil_min","Water below soil (%)"],["light_start","Light on from (hour)"],["light_hours","Light hours per day"],["pump_seconds","Pump run (s)"],["temp_min","Min temp (°C)"],["temp_max","Max temp (°C)"],["hum_max","Max humidity (%)"],["hum_min","Min humidity (%)"],["time_scale","Time speed-up (1 = real)"]];
 const $=id=>document.getElementById(id);
 $("tiles").innerHTML=T.map(([k,n,u])=>`<div class="card"><div class="lbl">${n}</div><div class="big"><span id="v_${k}">–</span> <small>${u}</small></div><svg id="s_${k}" viewBox="0 0 200 40" preserveAspectRatio="none"></svg></div>`).join("");
 $("acts").innerHTML=A.map(([k])=>`<button class="alt" id="a_${k}"></button>`).join("");

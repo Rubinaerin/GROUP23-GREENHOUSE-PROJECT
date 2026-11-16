@@ -1,10 +1,12 @@
+# pylint: disable=missing-function-docstring,missing-module-docstring,multiple-statements,line-too-long,multiple-imports
 import sqlite3, time
 from flask import Flask, jsonify, request, g, send_from_directory
 
 app = Flask(__name__)
 DB = "greenhouse.db"
-DEFAULTS = {"auto": 1, "soil_min": 35, "lux_min": 2000, "pump_seconds": 5, "pump_cooldown": 60,
-            "temp_min": 18, "temp_max": 28, "hum_max": 80,
+DEFAULTS = {"auto": 1, "soil_min": 35, "pump_seconds": 5, "pump_cooldown": 60,
+            "light_start": 6, "light_hours": 15, "time_scale": 1,
+            "temp_min": 24, "temp_max": 26, "hum_max": 65, "hum_min": 55,
             "light_manual": 0, "fan_manual": 0, "heater_manual": 0, "pump_request": 0,
             "last_pump": 0, "light_on": 0, "fan_on": 0, "heater_on": 0,
             "pump_ml_s": 20, "pump_watts": 6, "light_watts": 12, "fan_watts": 3, "heater_watts": 50}
@@ -41,6 +43,14 @@ def put(k, v):
 def index():
     return send_from_directory("static", "index.html")
 
+def light_schedule_on(s):
+    # Tomatoes + basil: light on for light_hours from light_start, then off for the rest of the 24 h.
+    # time_scale > 1 speeds the clock up for demos (60 = a whole day in 24 minutes).
+    lt = time.localtime()
+    seconds = lt.tm_hour * 3600 + lt.tm_min * 60 + lt.tm_sec
+    hour = (seconds * s["time_scale"] / 3600) % 24
+    return 1 if (hour - s["light_start"]) % 24 < s["light_hours"] else 0
+
 # The device sends a reading; the reply says what to switch. All automation rules live here.
 @app.post("/api/readings")
 def add_reading():
@@ -54,8 +64,7 @@ def add_reading():
     if s["auto"]:
         if d["soil"] < s["soil_min"] and now - s["last_pump"] > s["pump_cooldown"]:
             pump = s["pump_seconds"]
-        if light and d["light"] > s["lux_min"] * 1.5: light = 0       # hysteresis: different on/off levels
-        elif not light and d["light"] < s["lux_min"]: light = 1
+        light = light_schedule_on(s)
         if d["temp"] > s["temp_max"] or d["humidity"] > s["hum_max"]: fan = 1
         elif d["temp"] < s["temp_max"] - 1 and d["humidity"] < s["hum_max"] - 5: fan = 0
         if d["temp"] < s["temp_min"]: heater = 1
@@ -80,6 +89,7 @@ def alerts(l, s, now):
     if l["temp"] > s["temp_max"]: a.append("Temperature above limit")
     if l["temp"] < s["temp_min"]: a.append("Temperature below limit")
     if l["humidity"] > s["hum_max"]: a.append("Humidity above limit")
+    if l["humidity"] < s["hum_min"]: a.append("Humidity below limit")
     if l["soil"] < s["soil_min"] - 10: a.append("Soil is too dry")
     if l["tank_low"]: a.append("Water tank is low")
     return a
@@ -121,4 +131,4 @@ def stats():
 
 if __name__ == "__main__":
     init()
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)  # debug=True only while developing on your own computer
