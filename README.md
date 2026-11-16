@@ -22,6 +22,8 @@ Stop either one with `Ctrl+C` in its terminal.
 On a phone (same Wi-Fi as the computer): open `http://<computer-ip>:5000`. You can check your computer ip with Windows + R, then cmd, then type `ipconfig`. It changes depending on the Wi-Fi connection, so check it again each session.
 
 ## Message format (ESP32 <-> server)
+
+```
 FORMAT BETWEEN THE ESP32 AND THE SERVER
 
 Device -> server: every 5 s, HTTP POST to http://<SERVER-IP>:5000/api/readings
@@ -64,6 +66,7 @@ NOTES FOR THE DEVICE TEAM
 - Wi-Fi: the device should reconnect by itself if the hotspot drops. It must use 2.4 GHz, since the ESP32 can't join 5 GHz.
 - Analog pins: on the ESP32, analog readings from some pins stop working while Wi-Fi is on. Analog sensors should be on ADC1 pins (GPIO 32-39); please verify this for your board.
 - Testing without hardware: run our simulator, python simulator.py http://<SERVER-IP>:5000
+```
 
 
 Other endpoints: GET /api/state (latest + settings + alerts), /api/history?n=60, /api/stats?hours=24, POST /api/control.
@@ -79,9 +82,6 @@ Demo: set "Time speed-up" to 60 in the dashboard to watch a whole day pass in 24
 - Run the server (steps above); the ESP32 posts to `http://<server-ip>:5000/api/readings` every 5 s.
 - Test without hardware: `python simulator.py` (or `python simulator.py http://<server-ip>:5000` if the server runs on another computer).
 - Allow Python through the Windows firewall (private networks) when asked.
-
-## Working together
-Tell me when you want to edit something, so that we don't edit the same thing at the same time. You can just let me know by sending me a message on WhatsApp I have it open all the time when I'm coding, if I'm not responding it means I'm not editing basically.
 
 ## Reset the database
 Stop the server, then run `python reset_db.py` in the project folder. This deletes all readings, pump runs and settings, and recreates the tables with the default settings.
