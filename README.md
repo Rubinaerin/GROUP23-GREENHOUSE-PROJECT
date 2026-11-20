@@ -1,6 +1,7 @@
 # Greenhouse software v2
 
 Server, dashboard and fake device for the smart mini greenhouse (tomatoes + basil).
+> 📖 **User Guide:** See [USER_GUIDE.md](USER_GUIDE.md) for instructions on using the mobile/web dashboard, charts, controls, and automation settings.
 
 ## First-time setup
 1. Install Python (on the first installer screen tick "Add python.exe to PATH"), then open a terminal in this folder.

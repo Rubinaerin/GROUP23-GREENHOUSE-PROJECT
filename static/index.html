@@ -3,53 +3,99 @@
 <meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="/static/manifest.json"><title>Mini greenhouse</title>
 <style>
 :root{--bg:#f1f6f2;--ink:#143323;--mut:#5d7366;--card:#fff;--line:#d5e2d9;--leaf:#2f7d4f;--water:#2b7bb9;--sun:#d9a21b;--hot:#c4522f}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,"Segoe UI",sans-serif}
-main{max-width:980px;margin:0 auto;padding:16px}header{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
-h1{margin:0;font-size:1.4rem}h2{font-size:1rem;margin:0 0 10px}.lbl{color:var(--mut)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:980px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+h1{margin:0;font-size:1.4rem}h2{font-size:1.05rem;margin:0 0 12px}.lbl{color:var(--mut);font-size:.9rem}
 #status::before{content:"";display:inline-block;width:.6em;height:.6em;border-radius:50%;background:var(--hot);margin-right:.4em}#status.on::before{background:var(--leaf)}
-#alerts div{background:#fbe9e3;border:1px solid var(--hot);color:#7a2a12;border-radius:8px;padding:8px 12px;margin-top:8px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
-.big{font-size:1.9rem;font-weight:600;font-variant-numeric:tabular-nums}.big small{font-size:.9rem;color:var(--mut);font-weight:400}
-svg{width:100%;height:40px;display:block;margin-top:4px}polyline{fill:none;stroke-width:2;stroke-linejoin:round}
-.row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
-button{font:inherit;padding:12px 16px;border-radius:8px;border:1px solid var(--leaf);background:var(--leaf);color:#fff;cursor:pointer}
-button.alt{background:#fff;color:var(--leaf)}button:disabled{opacity:.45}
-label{display:flex;flex-direction:column;font-size:.85rem;color:var(--mut)}input{width:120px;padding:8px;font:inherit}
+#alerts div{background:#fbe9e3;border:1px solid var(--hot);color:#7a2a12;border-radius:8px;padding:10px 12px;margin-top:8px;font-size:.92rem}
+
+/* 1. Sensör Kartları & Gelişmiş Grafikler */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin:14px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(20,51,35,.04)}
+.big{font-size:1.85rem;font-weight:700;font-variant-numeric:tabular-nums;margin:2px 0}.big small{font-size:.9rem;color:var(--mut);font-weight:400}
+.chart-wrap{margin-top:8px;background:#f8fbf9;border:1px solid #e6efe9;border-radius:8px;padding:6px 6px 4px}
+.chart-meta{display:flex;justify-content:space-between;font-size:.72rem;color:var(--mut);margin-bottom:2px;font-variant-numeric:tabular-nums}
+svg{width:100%;height:56px;display:block}polyline{fill:none;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+
+/* 2. Mobil Uyumlu Kontroller ve Ayarlar */
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px}
+.btn-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.btn-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+button{font:inherit;font-size:.92rem;font-weight:500;padding:12px 10px;border-radius:8px;border:1px solid var(--leaf);background:var(--leaf);color:#fff;cursor:pointer;text-align:center;transition:opacity .15s}
+button:active{transform:scale(.98)}
+button.alt{background:#fff;color:var(--leaf)}button:disabled{opacity:.45;cursor:not-allowed}
+#hint{font-size:.85rem;margin:0 0 12px;line-height:1.35}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+label{display:flex;flex-direction:column;justify-content:space-between;font-size:.8rem;color:var(--mut);gap:4px}
+input{width:100%;padding:9px 10px;font:inherit;font-size:.95rem;border:1px solid var(--line);border-radius:8px;background:#fcfefd;color:var(--ink)}
+input:focus{outline:none;border-color:var(--leaf);background:#fff}
+#save{width:100%;font-weight:600}
+
+/* 3. Last 24 Hours Özet Kutuları */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-box{background:#f8fbf9;border:1px solid #e3ede6;border-radius:10px;padding:12px}
+.stat-box.full{grid-column:1 / -1;background:#eef6f0;border-color:#cfe2d4}
+.stat-title{font-size:.8rem;color:var(--mut);margin-bottom:4px;font-weight:500}
+.stat-val{font-size:1.35rem;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.stat-sub{font-size:.8rem;color:var(--mut);margin-top:2px}
 </style></head><body><main>
 <header><h1>Mini greenhouse</h1><span id="status" class="lbl">waiting for the device</span></header>
 <div id="alerts"></div><section class="grid" id="tiles"></section>
 <section class="two"><div class="card"><h2>Controls</h2>
-<div class="row"><button id="mode"></button><button id="pump">Water now</button></div>
-<div class="row" id="acts"></div><p class="lbl" id="hint"></p>
-<div class="row" id="sets"></div><button id="save" class="alt">Save settings</button></div>
+<div class="btn-grid-2"><button id="mode"></button><button id="pump">Water now</button></div>
+<div class="btn-grid-3" id="acts"></div><p class="lbl" id="hint"></p>
+<div class="form-grid" id="sets"></div><button id="save" class="alt">Save settings</button></div>
 <div class="card"><h2>Last 24 hours</h2><div id="usage"></div></div></section>
 <script>
 const T=[["temp","Temperature","°C","--hot"],["humidity","Humidity","%","--water"],["soil","Soil moisture","%","--leaf"],["light","Light","lux","--sun"]];
 const A=[["light","Light"],["fan","Fan"],["heater","Heater"]];
 const F=[["soil_min","Water below soil (%)"],["light_start","Light on from (hour)"],["light_hours","Light hours per day"],["pump_seconds","Pump run (s)"],["temp_min","Min temp (°C)"],["temp_max","Max temp (°C)"],["hum_max","Max humidity (%)"],["hum_min","Min humidity (%)"],["time_scale","Time speed-up (1 = real)"]];
 const $=id=>document.getElementById(id);
-$("tiles").innerHTML=T.map(([k,n,u])=>`<div class="card"><div class="lbl">${n}</div><div class="big"><span id="v_${k}">–</span> <small>${u}</small></div><svg id="s_${k}" viewBox="0 0 200 40" preserveAspectRatio="none"></svg></div>`).join("");
+
+$("tiles").innerHTML=T.map(([k,n,u])=>`<div class="card"><div class="lbl">${n}</div><div class="big"><span id="v_${k}">–</span> <small>${u}</small></div><div class="chart-wrap"><div class="chart-meta"><span id="min_${k}">min: –</span><span id="max_${k}">max: –</span></div><svg id="s_${k}" viewBox="0 0 200 56" preserveAspectRatio="none"></svg></div></div>`).join("");
 $("acts").innerHTML=A.map(([k])=>`<button class="alt" id="a_${k}"></button>`).join("");
-$("sets").innerHTML=F.map(([k,n])=>`<label>${n}<input type="number" id="${k}"></label>`).join("");
+$("sets").innerHTML=F.map(([k,n])=>`<label><span>${n}</span><input type="number" id="${k}"></label>`).join("");
+
 const post=b=>fetch("/api/control",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}).then(refresh);
 let S={};
 $("mode").onclick=()=>post({auto:S.auto?0:1});$("pump").onclick=()=>post({pump:1});
 A.forEach(([k])=>$("a_"+k).onclick=()=>post({[k+"_manual"]:S[k+"_manual"]?0:1}));
 $("save").onclick=()=>post(Object.fromEntries(F.map(([k])=>[k,$(k).value])));
-function spark(k,h,c){const v=h.map(r=>r[k]);if(v.length<2)return;const lo=Math.min(...v),hi=Math.max(...v),d=hi-lo||1;
- $("s_"+k).innerHTML=`<polyline stroke="var(${c})" points="${v.map((x,i)=>`${i*200/(v.length-1)},${36-(x-lo)/d*32}`).join(" ")}"/>`}
+
+function spark(k,h,c){
+ const v=h.map(r=>r[k]).filter(x=>x!==undefined&&x!==null);
+ if(v.length<2)return;
+ const lo=Math.min(...v),hi=Math.max(...v),d=hi-lo||1;
+ $("min_"+k).textContent=`min: ${lo}`;
+ $("max_"+k).textContent=`max: ${hi}`;
+ const pts=v.map((x,i)=>[i*200/(v.length-1),48-(x-lo)/d*40]);
+ const linePts=pts.map(p=>p.join(",")).join(" ");
+ const areaPts=`0,54 ${linePts} 200,54`;
+ const [lx,ly]=pts[pts.length-1];
+ $("s_"+k).innerHTML=`<polygon points="${areaPts}" fill="var(${c})" fill-opacity="0.14"/><polyline stroke="var(${c})" points="${linePts}"/><circle cx="${lx}" cy="${ly}" r="3.2" fill="var(${c})"/>`;
+}
+
 async function refresh(){
  const [st,h,u]=await Promise.all(["/api/state","/api/history?n=60","/api/stats"].map(x=>fetch(x).then(r=>r.json())));
  S=st.settings;const l=st.latest;
  $("alerts").innerHTML=st.alerts.map(a=>`<div>⚠ ${a}</div>`).join("");
- if(l){T.forEach(([k,,,c])=>{$("v_"+k).textContent=l[k];spark(k,h,c)});
-  const age=st.now-l.ts;$("status").className=age<15?"on lbl":"lbl";$("status").textContent=age<15?"device online":`last data ${Math.round(age)} s ago`}
+ if(l){
+  T.forEach(([k,,,c])=>{$("v_"+k).textContent=l[k];spark(k,h,c)});
+  const age=st.now-l.ts;$("status").className=age<15?"on lbl":"lbl";$("status").textContent=age<15?"device online":`last data ${Math.round(age)} s ago`;
+ }
  $("mode").textContent=S.auto?"Mode: automatic":"Mode: manual";
  A.forEach(([k,n])=>{const b=$("a_"+k);b.disabled=!!S.auto;const on=S.auto?(l&&l[k+"_on"]):S[k+"_manual"];b.textContent=`${n}: ${on?"on":"off"}${S.auto?" (auto)":""}`});
  $("hint").textContent=S.auto?"Automatic: the server switches light, fan and heater by the limits below.":"Manual: you switch light, fan and heater. Watering only when you press the button.";
  F.forEach(([k])=>{if(document.activeElement.id!==k)$(k).value=S[k]});
- $("usage").innerHTML=`<p class="big">${Math.round(u.water_ml)} <small>ml water (${u.pump_runs} runs)</small></p><p class="big">${u.light_hours.toFixed(1)} <small>h light</small> · ${u.fan_hours.toFixed(1)} <small>h fan</small> · ${u.heater_hours.toFixed(1)} <small>h heater</small></p><p class="big">${u.energy_wh.toFixed(1)} <small>Wh estimated energy</small></p>`}
+ $("usage").innerHTML=`
+  <div class="stats-grid">
+   <div class="stat-box full"><div class="stat-title">💧 Water Consumption</div><div class="stat-val">${Math.round(u.water_ml)} ml</div><div class="stat-sub">${u.pump_runs} pump runs</div></div>
+   <div class="stat-box"><div class="stat-title">☀️ Light Active</div><div class="stat-val">${u.light_hours.toFixed(1)} h</div></div>
+   <div class="stat-box"><div class="stat-title">🌀 Fan Active</div><div class="stat-val">${u.fan_hours.toFixed(1)} h</div></div>
+   <div class="stat-box"><div class="stat-title">🔥 Heater Active</div><div class="stat-val">${u.heater_hours.toFixed(1)} h</div></div>
+   <div class="stat-box"><div class="stat-title">⚡ Est. Energy</div><div class="stat-val">${u.energy_wh.toFixed(1)} Wh</div></div>
+  </div>`;
+}
 refresh();setInterval(refresh,2000);
 </script></main></body></html>
