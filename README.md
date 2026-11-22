@@ -40,6 +40,8 @@ Server -> device (the reply to that POST):
 
 pump_seconds = run the pump for this many seconds, then stop (0 = do nothing)
 light, fan, heater = 1 (on) or 0 (off)
+If the server answers 400, the reading was rejected: the reply lists the "problems". Do not act on it, keep the last states and send the next reading.
+Readings are checked: temp -40..85, humidity 0..100, soil 0..100, light 0..120000, tank_low 0 or 1.
 
 WHAT THE SERVER DECIDES (defaults, can be changed in the dashboard)
 The server makes all the decisions. The device only reads the sensors and does what the reply says.
@@ -70,7 +72,7 @@ NOTES FOR THE DEVICE TEAM
 ```
 
 
-Other endpoints: GET /api/state (latest + settings + alerts), /api/history?n=60, /api/stats?hours=24, POST /api/control.
+Other endpoints: GET /api/state (latest + settings + alerts), /api/history?n=60 or ?hours=24&max_points=500, /api/stats?hours=24, /api/indicators?hours=24 (temperature and humidity in range, uptime, usage), /api/export.csv?hours=24 (download readings), POST /api/control.
 
 ## Rules (add_reading in app.py)
 Soil low -> pump (cooldown, never with an empty tank); light follows a daily schedule (15 h on / 9 h off); temperature or humidity high -> fan; temperature low -> heater (never together with the fan). Alerts are computed live in alerts(). Defaults (limits, watts, flow) are in DEFAULTS and must be measured/agreed with the team.
@@ -83,6 +85,12 @@ Demo: set "Time speed-up" to 60 in the dashboard to watch a whole day pass in 24
 - Run the server (steps above); the ESP32 posts to `http://<server-ip>:5000/api/readings` every 5 s.
 - Test without hardware: `python simulator.py` (or `python simulator.py http://<server-ip>:5000` if the server runs on another computer).
 - Allow Python through the Windows firewall (private networks) when asked.
+
+## Maintenance mode (when someone works inside a hatch)
+Button on the dashboard = `POST /api/control` with `{"maintenance": 1}` (on) or `{"maintenance": 0}` (off). While it is on, the server replies `fan: 0, heater: 0, pump_seconds: 0` (the light keeps its normal schedule), "Water now" is ignored, and the alerts show only "Maintenance mode ON" (plus device offline / tank low). The device needs no change: it just applies the 0 values. It ends by itself after `maintenance_minutes` (default 15; 0 = no timeout); sending `{"maintenance": 1}` again restarts the timer. `GET /api/state` returns `maintenance` (true/false) and `maintenance_remaining_s` (seconds left, or null). Readings taken during maintenance are marked (`maintenance` column in history and CSV) and left out of the temperature/humidity statistics in `/api/indicators` (it reports `maintenance_min`).
+
+## Tests
+Run `python -m unittest -v` in the project folder (server not needed). They check the control rules and the input checks, using a temporary database. Run them before every commit that touches app.py.
 
 ## Reset the database
 Stop the server, then run `python reset_db.py` in the project folder. This deletes all readings, pump runs and settings, and recreates the tables with the default settings.
