@@ -1,89 +1,76 @@
-# Mini Greenhouse — User Guide
+# Mini Greenhouse – User Guide
 
-Welcome to the **Smart Mini Greenhouse** dashboard (designed for growing **tomatoes and basil**). This guide explains how to access the web/mobile app, read sensor charts, control devices, and configure automation settings.
-
----
-
-## 1. Accessing the Dashboard (Computer & Phone)
-
-### On Your Computer
-1. Start the server (`python app.py`) and the device/simulator (`python simulator.py`).
-2. Open your web browser and go to: `http://localhost:5000`
-
-### On Your Phone (Mobile App View)
-1. Connect your phone and computer to the **same Wi-Fi network** (or use a phone hotspot).
-2. Find the local IP address printed in the server terminal (for example: `http://10.10.150.35:5000`).
-3. Open **Safari** (iOS) or **Chrome** (Android) on your phone and type that address into the URL bar.
-4. *(Optional)* **Add to Home Screen:** In Safari, tap the **Share** button and select **Add to Home Screen** (in Chrome, tap the menu `⋮` and select **Install app / Add to Home Screen**) to launch the dashboard like a standalone mobile app.
+Welcome to the **Mini Greenhouse** web and mobile dashboard. This guide explains how to access the interface, read live sensor data, switch between automatic and manual modes, and configure environmental thresholds for your plants (tomatoes and basil).
 
 ---
 
-## 2. Understanding the Dashboard
+## 1. Accessing the Dashboard
 
-### Connection Status & Live Alerts
-- **Status Indicator (Top Right):**
-  - 🟢 **device online:** Live sensor data is arriving normally (updated every 5 seconds).
-  - 🔴 **Device offline / last data X s ago:** No sensor reading has been received for more than 15–30 seconds. Check your ESP32 board, Wi-Fi connection, or `simulator.py`.
-- **Alert Banners (Top):** Red warning boxes appear automatically when attention is needed:
-  - `⚠ Water tank is low` — Refill the water reservoir immediately. Automatic watering is paused until refilled.
-  - `⚠ Temperature / Humidity out of range` — Current climate values have crossed your configured safety thresholds.
+### On a Computer (Local)
+1. Ensure the server (`python app.py`) is running in your terminal.
+2. Open any web browser and go to:  
+   `http://localhost:5000` (or `http://127.0.0.1:5000`)
 
-### Live Sensor Cards & Charts
-Each of the four top cards displays the current reading and a live trend chart of the last 60 readings, including **min** and **max** values:
-1. **Temperature (`°C`):** Target range for tomatoes & basil is **24–26 °C** (optimal **25 °C**).
-2. **Humidity (`%`):** Target is around **60%**. High humidity triggers the fan; low humidity triggers a visual alert.
-3. **Soil Moisture (`%`):** Measures substrate wetness (`0%` = completely dry, `100%` = fully wet).
-4. **Light (`lux`):** Monitors grow-light intensity.
+### On a Mobile Phone (Same Wi-Fi / Hotspot)
+1. Connect your phone and the host computer to the **same Wi-Fi network** (or personal hotspot).
+2. Check the local IP address printed in the server terminal (e.g., `http://10.10.150.35:5000` or `http://192.168.1.x:5000`).
+3. Open **Safari** (iOS) or **Chrome** (Android) and enter that exact address including `:5000`.
+4. *(Optional)* Tap **Share → Add to Home Screen** on iOS (or **Menu → Install app** on Android) to use the dashboard like a standalone mobile app.
 
 ---
 
-## 3. Controls & Operating Modes
+## 2. Monitoring Sensors & Charts
 
-### Automatic vs. Manual Mode
-- **Mode: automatic (Default):**
-  - The server automatically controls the **Light**, **Fan**, and **Heater** based on your configured limits.
-  - Individual device buttons (`Light`, `Fan`, `Heater`) are locked and display `(auto)` alongside their current state.
-- **Mode: manual:**
-  - Tap the **Mode** button to switch to manual control.
-  - You can now tap **Light**, **Fan**, or **Heater** directly to turn them **on** or **off** at any time.
-  - Automatic watering is disabled in manual mode; watering only happens when you press **Water now**.
+At the top of the screen, the status indicator shows whether the greenhouse hardware/simulator is actively sending readings (`device online` in green) or disconnected (`device offline` / `last data X s ago`). Use the **5 min / 24 h** toggle in the header to switch the sensor trend charts between the last 5 minutes (60 readings) and the last 24 hours.
 
-### Manual Watering
-- **Water now:** Triggers a single watering cycle for the configured pump duration (`Pump run (s)`). *(Note: For safety, the pump will not run if the water tank is empty).*
+Below the status bar, four live sensor cards display current readings alongside trend charts:
+* **Temperature (°C):** Air temperature inside the greenhouse with `min` and `max` range markers.
+* **Humidity (%):** Relative air humidity inside the enclosure.
+* **Soil moisture (%):** Substrate moisture level (`0%` = completely dry, `100%` = fully wet).
+* **Light (lux):** Ambient/grow-light intensity measured by the light sensor.
 
 ---
 
-## 4. Automation Settings
+## 3. Controls: Automatic vs. Manual Mode
 
-Scroll down to the **Controls** form to customize how the greenhouse behaves in **Automatic Mode**:
+In the **Controls** card, you can choose how actuators (Light, Fan, Heater, Water Pump) are operated:
 
-| Setting | Default | Description |
-| :--- | :---: | :--- |
-| **Water below soil (%)** | `35` | Triggers the water pump when soil moisture drops below this percentage (maximum once per minute). |
-| **Light on from (hour)** | `6` | The hour of the day (`0–23`) when the grow light turns on (e.g., `6` = 06:00). |
-| **Light hours per day** | `15` | Total hours the grow light stays on each day (default: 15h on, 9h off). |
-| **Pump run (s)** | `5` | How many seconds the water pump runs per watering cycle. |
-| **Min temp (°C)** | `18` | Turns the **Heater** on if temperature falls below this limit. |
-| **Max temp (°C)** | `28` | Turns the **Fan** on if temperature rises above this limit. |
-| **Max humidity (%)** | `80` | Turns the **Fan** on to ventilate if humidity exceeds this limit. |
-| **Min humidity (%)** | `55` | Displays a low-humidity alert if air becomes drier than this threshold. |
-| **Time speed-up (1 = real)** | `1` | Simulation multiplier (`1` = real-time; set to `60` during demos to simulate 24 hours in 24 minutes). |
+* **Mode: automatic (Default)**  
+  The server automatically turns the light, fan, heater, and water pump on or off based on your configured limits. Manual toggle buttons for Light, Fan, and Heater are locked (`(auto)`).
+* **Mode: manual**  
+  Tap the mode button to switch to manual control. You can now tap **Light**, **Fan**, or **Heater** directly to toggle them `on` or `off`. Automatic watering is paused in manual mode.
+* **Water now**  
+  Triggers a single watering cycle for the configured `Pump run (s)` duration, regardless of whether automatic or manual mode is active. *(Disabled if the water tank is empty or maintenance mode is active.)*
 
-After changing any number, tap **Save settings** to apply your changes immediately.
-
----
-
-## 5. Last 24 Hours Summary
-
-At the bottom of the dashboard, the **Last 24 hours** panel tracks resource usage over the past day:
-- **Water Consumption:** Total milliliters (`ml`) of water used and total number of pump runs.
-- **Light / Fan / Heater Active:** Total operating hours (`h`) for each actuator.
-- **Est. Energy:** Estimated total electricity consumption in Watt-hours (`Wh`).
+### Maintenance mode
+When someone opens a hatch to work inside the greenhouse, press **Start maintenance**:
+* It pauses the **fan**, **heater**, and **pump** (manual buttons show `paused` and **Water now** is disabled).
+* The **light** keeps following its normal schedule.
+* Maintenance mode ends automatically after **15 minutes** (configurable via `Maintenance timeout`), or you can press **End maintenance** to resume normal operation right away. Starting maintenance again begins a fresh 15-minute timer.
 
 ---
 
-## 6. Quick Troubleshooting
+## 4. Adjusting Automation Settings
 
-- **Page won't load on phone:** Make sure your phone is on the exact same Wi-Fi network as the server computer and that you typed `:5000` at the end of the IP address (e.g., `http://10.10.150.35:5000`).
-- **Buttons don't respond:** Check if the system is in **Mode: automatic**. Switch to **Mode: manual** to toggle Light, Fan, or Heater manually.
-- **Pump won't start when pressing "Water now":** Verify that the `Water tank is low` alert is not active.
+You can customize the target thresholds in the **Controls** form and tap **Save settings** to apply them immediately:
+
+| Setting | Description | Default |
+| :--- | :--- | :---: |
+| **Water below soil (%)** | Soil moisture threshold that triggers automatic watering. | `35` |
+| **Light on from (hour)** | Hour of the day (0–23) when the grow light turns on. | `6` |
+| **Light hours per day** | Total hours the grow light stays on each day. | `15` |
+| **Pump run (s)** | Duration (in seconds) the water pump runs per watering cycle. | `5` |
+| **Min temp (°C)** | Temperature below which the heater turns on. | `24` |
+| **Max temp (°C)** | Temperature above which the cooling/ventilation fan turns on. | `26` |
+| **Max humidity (%)** | Humidity level above which the fan turns on to ventilate. | `65` |
+| **Min humidity (%)** | Low-humidity alert threshold. | `55` |
+| **Maintenance timeout (min)** | Auto-exit timer for maintenance mode (`0` = no timeout). | `15` |
+| **Time speed-up (1 = real)** | Simulation speed multiplier (`1` = real-time; `60` = 1 day in 24 min). | `1` |
+
+---
+
+## 5. Alerts, 24-Hour Statistics & Export
+
+* **Active Alerts:** Warning banners appear automatically at the top of the dashboard when attention is needed (such as low water tank, dry soil, low humidity, or extreme temperatures).
+* **Last 24 hours:** Summarizes total water consumed (`ml` and number of pump runs), active operating hours for the light, fan, and heater, and estimated energy usage (`Wh`). *(Note: Until actual pump flow rate and device wattage are measured on hardware, these figures are shown as estimates.)* Use **Download CSV (24 h)** to export the last 24 hours of sensor readings.
+* **24h Performance:** Shows the percentage of time temperature and humidity stayed within the target range, overall device uptime percentage, 24-hour averages, and total reading count (displays `–` when there are not enough readings yet).

@@ -5,12 +5,19 @@
 :root{--bg:#f1f6f2;--ink:#143323;--mut:#5d7366;--card:#fff;--line:#d5e2d9;--leaf:#2f7d4f;--water:#2b7bb9;--sun:#d9a21b;--hot:#c4522f}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
 main{max-width:980px;margin:0 auto;padding:16px}
-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.hdr-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 h1{margin:0;font-size:1.4rem}h2{font-size:1.05rem;margin:0 0 12px}.lbl{color:var(--mut);font-size:.9rem}
 #status::before{content:"";display:inline-block;width:.6em;height:.6em;border-radius:50%;background:var(--hot);margin-right:.4em}#status.on::before{background:var(--leaf)}
+#maintbar:not(:empty){background:#fef5d9;border:1px solid var(--sun);color:#6e4e00;border-radius:8px;padding:10px 12px;margin-top:8px;font-size:.92rem;font-weight:600}
 #alerts div{background:#fbe9e3;border:1px solid var(--hot);color:#7a2a12;border-radius:8px;padding:10px 12px;margin-top:8px;font-size:.92rem}
 
-/* 1. Sensör Kartları & Gelişmiş Grafikler */
+/* Grafik Zaman Aralığı Geçişi */
+.range-toggle{display:inline-flex;background:#e3ede6;border-radius:8px;padding:2px}
+.range-toggle button{border:none;background:transparent;color:var(--mut);padding:4px 10px;font-size:.8rem;font-weight:600;border-radius:6px;cursor:pointer}
+.range-toggle button.active{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+
+/* 1. Sensör Kartları & Grafikler */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin:14px 0}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(20,51,35,.04)}
 .big{font-size:1.85rem;font-weight:700;font-variant-numeric:tabular-nums;margin:2px 0}.big small{font-size:.9rem;color:var(--mut);font-weight:400}
@@ -20,52 +27,77 @@ svg{width:100%;height:56px;display:block}polyline{fill:none;stroke-width:2.2;str
 
 /* 2. Mobil Uyumlu Kontroller ve Ayarlar */
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px}
+.stack{display:flex;flex-direction:column;gap:12px}
 .btn-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.btn-grid-2 .full{grid-column:1 / -1}
 .btn-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
-button{font:inherit;font-size:.92rem;font-weight:500;padding:12px 10px;border-radius:8px;border:1px solid var(--leaf);background:var(--leaf);color:#fff;cursor:pointer;text-align:center;transition:opacity .15s}
-button:active{transform:scale(.98)}
-button.alt{background:#fff;color:var(--leaf)}button:disabled{opacity:.45;cursor:not-allowed}
+button,.btn-link{font:inherit;font-size:.92rem;font-weight:500;padding:12px 10px;border-radius:8px;border:1px solid var(--leaf);background:var(--leaf);color:#fff;cursor:pointer;text-align:center;text-decoration:none;display:inline-block;transition:opacity .15s}
+button:active,.btn-link:active{transform:scale(.98)}
+button.alt,.btn-link.alt{background:#fff;color:var(--leaf)}button:disabled{opacity:.45;cursor:not-allowed}
 #hint{font-size:.85rem;margin:0 0 12px;line-height:1.35}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 label{display:flex;flex-direction:column;justify-content:space-between;font-size:.8rem;color:var(--mut);gap:4px}
 input{width:100%;padding:9px 10px;font:inherit;font-size:.95rem;border:1px solid var(--line);border-radius:8px;background:#fcfefd;color:var(--ink)}
 input:focus{outline:none;border-color:var(--leaf);background:#fff}
-#save{width:100%;font-weight:600}
+#save,.csv-btn{width:100%;font-weight:600}
+.csv-btn{margin-top:12px}
 
-/* 3. Last 24 Hours Özet Kutuları */
+/* 3. Last 24 Hours & Performance Özet Kutuları */
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .stat-box{background:#f8fbf9;border:1px solid #e3ede6;border-radius:10px;padding:12px}
 .stat-box.full{grid-column:1 / -1;background:#eef6f0;border-color:#cfe2d4}
 .stat-title{font-size:.8rem;color:var(--mut);margin-bottom:4px;font-weight:500}
 .stat-val{font-size:1.35rem;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
 .stat-sub{font-size:.8rem;color:var(--mut);margin-top:2px}
+.est-note{font-size:.78rem;color:var(--mut);margin-top:10px;font-style:italic}
 </style></head><body><main>
-<header><h1>Mini greenhouse</h1><span id="status" class="lbl">waiting for the device</span></header>
-<div id="alerts"></div><section class="grid" id="tiles"></section>
-<section class="two"><div class="card"><h2>Controls</h2>
-<div class="btn-grid-2"><button id="mode"></button><button id="pump">Water now</button></div>
-<div class="btn-grid-3" id="acts"></div><p class="lbl" id="hint"></p>
-<div class="form-grid" id="sets"></div><button id="save" class="alt">Save settings</button></div>
-<div class="card"><h2>Last 24 hours</h2><div id="usage"></div></div></section>
+<header>
+ <h1>Mini greenhouse</h1>
+ <div class="hdr-right">
+  <div class="range-toggle" role="group" aria-label="Chart range">
+   <button id="r_5m" class="active" type="button">5 min</button>
+   <button id="r_24h" type="button">24 h</button>
+  </div>
+  <span id="status" class="lbl">waiting for the device</span>
+ </div>
+</header>
+<div id="maintbar"></div><div id="alerts"></div><section class="grid" id="tiles"></section>
+<section class="two">
+ <div class="card"><h2>Controls</h2>
+  <div class="btn-grid-2"><button id="mode"></button><button id="pump">Water now</button><button id="maint" class="alt full"></button></div>
+  <div class="btn-grid-3" id="acts"></div><p class="lbl" id="hint"></p>
+  <div class="form-grid" id="sets"></div><button id="save" class="alt">Save settings</button>
+ </div>
+ <div class="stack">
+  <div class="card"><h2>Last 24 hours</h2><div id="usage"></div><a class="btn-link alt csv-btn" href="/api/export.csv?hours=24" download="greenhouse_24h.csv">Download CSV (24 h)</a></div>
+  <div class="card"><h2>24h Performance</h2><div id="perf"></div></div>
+ </div>
+</section>
 <script>
 const T=[["temp","Temperature","°C","--hot"],["humidity","Humidity","%","--water"],["soil","Soil moisture","%","--leaf"],["light","Light","lux","--sun"]];
 const A=[["light","Light"],["fan","Fan"],["heater","Heater"]];
-const F=[["soil_min","Water below soil (%)"],["light_start","Light on from (hour)"],["light_hours","Light hours per day"],["pump_seconds","Pump run (s)"],["temp_min","Min temp (°C)"],["temp_max","Max temp (°C)"],["hum_max","Max humidity (%)"],["hum_min","Min humidity (%)"],["time_scale","Time speed-up (1 = real)"]];
+const F=[["soil_min","Water below soil (%)"],["light_start","Light on from (hour)"],["light_hours","Light hours per day"],["pump_seconds","Pump run (s)"],["temp_min","Min temp (°C)"],["temp_max","Max temp (°C)"],["hum_max","Max humidity (%)"],["hum_min","Min humidity (%)"],["maintenance_minutes","Maintenance timeout (min, 0 = none)"],["time_scale","Time speed-up (1 = real)"]];
 const $=id=>document.getElementById(id);
 
 $("tiles").innerHTML=T.map(([k,n,u])=>`<div class="card"><div class="lbl">${n}</div><div class="big"><span id="v_${k}">–</span> <small>${u}</small></div><div class="chart-wrap"><div class="chart-meta"><span id="min_${k}">min: –</span><span id="max_${k}">max: –</span></div><svg id="s_${k}" viewBox="0 0 200 56" preserveAspectRatio="none"></svg></div></div>`).join("");
 $("acts").innerHTML=A.map(([k])=>`<button class="alt" id="a_${k}"></button>`).join("");
 $("sets").innerHTML=F.map(([k,n])=>`<label><span>${n}</span><input type="number" id="${k}"></label>`).join("");
 
-const post=b=>fetch("/api/control",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}).then(refresh);
-let S={};
+const post=b=>fetch("/api/control",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)})
+ .then(async r=>{if(!r.ok){const e=await r.json();alert((e.error||"Error")+": "+(e.problems||[]).join(", "))}refresh()});
+let S={},chartRange="5m";
+$("r_5m").onclick=()=>{chartRange="5m";$("r_5m").classList.add("active");$("r_24h").classList.remove("active");refresh()};
+$("r_24h").onclick=()=>{chartRange="24h";$("r_24h").classList.add("active");$("r_5m").classList.remove("active");refresh()};
 $("mode").onclick=()=>post({auto:S.auto?0:1});$("pump").onclick=()=>post({pump:1});
+$("maint").onclick=()=>post({maintenance:S.maintenance?0:1});
 A.forEach(([k])=>$("a_"+k).onclick=()=>post({[k+"_manual"]:S[k+"_manual"]?0:1}));
 $("save").onclick=()=>post(Object.fromEntries(F.map(([k])=>[k,$(k).value])));
 
+const fmt=(v,suf="")=>v===null||v===undefined?"–":`${v}${suf}`;
+
 function spark(k,h,c){
  const v=h.map(r=>r[k]).filter(x=>x!==undefined&&x!==null);
- if(v.length<2)return;
+ if(v.length<2){$("min_"+k).textContent="min: –";$("max_"+k).textContent="max: –";$("s_"+k).innerHTML="";return}
  const lo=Math.min(...v),hi=Math.max(...v),d=hi-lo||1;
  $("min_"+k).textContent=`min: ${lo}`;
  $("max_"+k).textContent=`max: ${hi}`;
@@ -77,15 +109,19 @@ function spark(k,h,c){
 }
 
 async function refresh(){
- const [st,h,u]=await Promise.all(["/api/state","/api/history?n=60","/api/stats"].map(x=>fetch(x).then(r=>r.json())));
+ const histUrl=chartRange==="24h"?"/api/history?hours=24&max_points=200":"/api/history?n=60";
+ const [st,h,u,ind]=await Promise.all(["/api/state",histUrl,"/api/stats","/api/indicators?hours=24"].map(x=>fetch(x).then(r=>r.json())));
  S=st.settings;const l=st.latest;
- $("alerts").innerHTML=st.alerts.map(a=>`<div>⚠ ${a}</div>`).join("");
+ $("maint").textContent=st.maintenance?"End maintenance":"Start maintenance";
+ $("maintbar").textContent=st.maintenance?"Maintenance mode ON"+(st.maintenance_remaining_s==null?"":", ends in "+Math.ceil(st.maintenance_remaining_s/60)+" min"):"";
+ $("pump").disabled=!!st.maintenance;
+ $("alerts").innerHTML=st.alerts.filter(a=>!a.startsWith("Maintenance mode ON")).map(a=>`<div>⚠ ${a}</div>`).join("");
  if(l){
   T.forEach(([k,,,c])=>{$("v_"+k).textContent=l[k];spark(k,h,c)});
   const age=st.now-l.ts;$("status").className=age<15?"on lbl":"lbl";$("status").textContent=age<15?"device online":`last data ${Math.round(age)} s ago`;
  }
  $("mode").textContent=S.auto?"Mode: automatic":"Mode: manual";
- A.forEach(([k,n])=>{const b=$("a_"+k);b.disabled=!!S.auto;const on=S.auto?(l&&l[k+"_on"]):S[k+"_manual"];b.textContent=`${n}: ${on?"on":"off"}${S.auto?" (auto)":""}`});
+ A.forEach(([k,n])=>{const b=$("a_"+k);const hold=st.maintenance&&k!=="light";b.disabled=!!S.auto||hold;const on=S.auto?(l&&l[k+"_on"]):S[k+"_manual"];b.textContent=hold?`${n}: paused`:`${n}: ${on?"on":"off"}${S.auto?" (auto)":""}`});
  $("hint").textContent=S.auto?"Automatic: the server switches light, fan and heater by the limits below.":"Manual: you switch light, fan and heater. Watering only when you press the button.";
  F.forEach(([k])=>{if(document.activeElement.id!==k)$(k).value=S[k]});
  $("usage").innerHTML=`
@@ -95,6 +131,13 @@ async function refresh(){
    <div class="stat-box"><div class="stat-title">🌀 Fan Active</div><div class="stat-val">${u.fan_hours.toFixed(1)} h</div></div>
    <div class="stat-box"><div class="stat-title">🔥 Heater Active</div><div class="stat-val">${u.heater_hours.toFixed(1)} h</div></div>
    <div class="stat-box"><div class="stat-title">⚡ Est. Energy</div><div class="stat-val">${u.energy_wh.toFixed(1)} Wh</div></div>
+  </div>${u.values_are_estimates?'<div class="est-note">Estimated values, not measured yet.</div>':''}`;
+ $("perf").innerHTML=`
+  <div class="stats-grid">
+   <div class="stat-box"><div class="stat-title">🌡️ Temp in Range</div><div class="stat-val">${fmt(ind.temp_in_range_pct,"%")}</div><div class="stat-sub">Avg: ${fmt(ind.temp_avg," °C")}</div></div>
+   <div class="stat-box"><div class="stat-title">💧 Humidity in Range</div><div class="stat-val">${fmt(ind.hum_in_range_pct,"%")}</div><div class="stat-sub">Avg: ${fmt(ind.hum_avg," %")}</div></div>
+   <div class="stat-box"><div class="stat-title">📡 Device Uptime</div><div class="stat-val">${fmt(ind.uptime_pct,"%")}</div></div>
+   <div class="stat-box"><div class="stat-title">📊 24h Readings</div><div class="stat-val">${fmt(ind.readings)}</div></div>
   </div>`;
 }
 refresh();setInterval(refresh,2000);
