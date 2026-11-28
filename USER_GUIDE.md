@@ -40,7 +40,7 @@ In the **Controls** card, you can choose how actuators (Light, Fan, Heater, Wate
 * **Mode: manual**  
   Tap the mode button to switch to manual control. You can now tap **Light**, **Fan**, or **Heater** directly to toggle them `on` or `off`. Automatic watering is paused in manual mode.
 * **Water now**  
-  Triggers a single watering cycle for the configured `Pump run (s)` duration, regardless of whether automatic or manual mode is active. *(Disabled if the water tank is empty or maintenance mode is active.)*
+  Triggers a single watering cycle for the configured `Pump run (s)` duration, regardless of whether automatic or manual mode is active. *(The button is only disabled during maintenance mode. If the water tank is empty, the button remains clickable, the pump will not run, and the `Water tank is low` alert is shown.)*
 
 ### Maintenance mode
 When someone opens a hatch to work inside the greenhouse, press **Start maintenance**:
@@ -74,3 +74,12 @@ You can customize the target thresholds in the **Controls** form and tap **Save 
 * **Active Alerts:** Warning banners appear automatically at the top of the dashboard when attention is needed (such as low water tank, dry soil, low humidity, or extreme temperatures).
 * **Last 24 hours:** Summarizes total water consumed (`ml` and number of pump runs), active operating hours for the light, fan, and heater, and estimated energy usage (`Wh`). *(Note: Until actual pump flow rate and device wattage are measured on hardware, these figures are shown as estimates.)* Use **Download CSV (24 h)** to export the last 24 hours of sensor readings.
 * **24h Performance:** Shows the percentage of time temperature and humidity stayed within the target range, overall device uptime percentage, 24-hour averages, and total reading count (displays `–` when there are not enough readings yet).
+
+---
+
+## 6. Quick Troubleshooting
+
+* **Page won't load on phone:** Ensure your phone is connected to the exact same Wi-Fi network as the server computer and that `:5000` is included at the end of the IP address (e.g., `http://10.10.150.35:5000`).
+* **Dashboard shows "Device offline":** Check that `simulator.py` or the ESP32 hardware is running and sending sensor readings every 5 seconds.
+* **Buttons don't respond:** Verify whether the system is in **Mode: automatic** or **Maintenance mode**. Switch to **Mode: manual** (and end maintenance if active) to toggle Light, Fan, or Heater manually.
+* **Pump doesn't run when pressing "Water now":** Check if the `Water tank is low` alert is active at the top of the page (the pump will not run when the tank is empty) or if maintenance mode is active.
