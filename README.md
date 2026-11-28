@@ -38,7 +38,7 @@ tank_low = 0 (water OK) or 1 (water low)
 Server -> device (the reply to that POST):
 {"pump_seconds": 5, "light": 1, "fan": 0, "heater": 0}
 
-pump_seconds = run the pump for this many seconds, then stop (0 = do nothing)
+pump_seconds = run the pump for this many seconds, then stop (0 = do nothing) (never more than 15: the server limits the setting to 15 and the device caps at 15 too)
 light, fan, heater = 1 (on) or 0 (off)
 If the server answers 400, the reading was rejected: the reply lists the "problems". Do not act on it, keep the last states and send the next reading.
 Readings are checked: temp -40..85, humidity 0..100, soil 0..100, light 0..120000, tank_low 0 or 1.

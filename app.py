@@ -16,12 +16,13 @@ DEFAULTS = {"auto": 1, "soil_min": 35, "pump_seconds": 5, "pump_cooldown": 60,
 EDITABLE = set(DEFAULTS) - {"pump_request", "last_pump", "light_on", "fan_on", "heater_on", "maintenance_start"}
 OFFLINE_S = 30          # no reading for this long = device offline
 PUMP_REQUEST_TTL = 60   # a "Water now" press is forgotten if the device doesn't pick it up in time
+PUMP_SECONDS_MAX = 15   # longest pump run; the device firmware caps at the same value (PUMP_MAX_S in its config.py)
 
 # What a reading from the device may contain (min, max).
 READING_LIMITS = {"temp": (-40, 85), "humidity": (0, 100), "soil": (0, 100), "light": (0, 120000)}
 # Allowed range of each setting; settings not listed here must be between 0 and 100000.
 BOUNDS = {"auto": (0, 1), "maintenance": (0, 1), "maintenance_minutes": (0, 480), "light_manual": (0, 1), "fan_manual": (0, 1), "heater_manual": (0, 1), "values_measured": (0, 1),
-          "soil_min": (0, 100), "pump_seconds": (0, 60), "pump_cooldown": (0, 3600),
+          "soil_min": (0, 100), "pump_seconds": (0, PUMP_SECONDS_MAX), "pump_cooldown": (0, 3600),
           "light_start": (0, 23.99), "light_hours": (0, 24), "time_scale": (1, 1000),
           "temp_min": (-10, 60), "temp_max": (-10, 60), "temp_target": (-10, 60), "temp_tol": (0, 20),
           "hum_max": (0, 100), "hum_min": (0, 100), "hum_target": (0, 100), "hum_tol": (0, 50)}
@@ -122,11 +123,12 @@ def add_reading():
         return jsonify(error="reading rejected", problems=problems), 400
     tank_low = int(d.get("tank_low", 0))
     s, now = settings(), time.time()
+    pump_len = min(s["pump_seconds"], PUMP_SECONDS_MAX)   # also protects against an old, longer value in the database
     pump, source = 0, "auto"
     light, fan, heater = s["light_on"], s["fan_on"], s["heater_on"]
     if s["auto"]:
         if d["soil"] < s["soil_min"] and now - s["last_pump"] > s["pump_cooldown"]:
-            pump = s["pump_seconds"]
+            pump = pump_len
         light = light_schedule_on(s)
         if d["temp"] > s["temp_max"] or d["humidity"] > s["hum_max"]: fan = 1
         elif d["temp"] < s["temp_max"] - 1 and d["humidity"] < s["hum_max"] - 5: fan = 0
@@ -136,7 +138,7 @@ def add_reading():
     else:
         light, fan, heater = s["light_manual"], s["fan_manual"], s["heater_manual"]
     if now - s["pump_request"] < PUMP_REQUEST_TTL:                     # "Water now" button (one-shot, expires)
-        pump, source = s["pump_seconds"], "manual"; put("pump_request", 0)
+        pump, source = pump_len, "manual"; put("pump_request", 0)
     active, _ = maintenance_status(s, now)
     if active: fan = heater = pump = 0        # maintenance: fan, heater and pump paused; the light is not touched
     if tank_low: pump = 0                                              # never run the pump on an empty tank

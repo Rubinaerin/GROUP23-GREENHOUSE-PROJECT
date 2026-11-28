@@ -79,6 +79,14 @@ class Settings(ServerTest):
     def test_valid_settings_are_saved(self):
         self.assertEqual(self.control(soil_min="40", temp_max=27).get_json()["soil_min"], 40)
 
+    def test_pump_seconds_is_limited_to_15(self):
+        self.assertEqual(self.control(pump_seconds=15).status_code, 200)
+        self.assertEqual(self.control(pump_seconds=16).status_code, 400)
+    def test_an_old_longer_value_is_clamped(self):
+        with server.app.app_context():
+            server.put("pump_seconds", 40); server.db().commit()
+        self.assertEqual(self.send(soil=20)[1]["pump_seconds"], 15)
+
 class Data(ServerTest):
     def test_history_window_and_csv(self):
         for _ in range(3): self.send()
